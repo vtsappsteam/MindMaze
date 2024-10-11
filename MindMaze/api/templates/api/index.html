@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to JSON</title>
+</head>
+<body>
+    <h1>Upload a PDF</h1>
+
+    <form id="pdf-form">
+        <label for="pdf">Choose a PDF file:</label>
+        <input type="file" id="pdf" accept="application/pdf">
+        <br><br>
+        <button type="button" id="test">Test</button>
+        <br><br>
+    </form>
+
+    <script>
+        let file;  // Variable to store the selected file
+
+        // Store the selected file when user chooses one
+        document.getElementById('pdf').addEventListener('change', function(event) {
+            file = event.target.files[0];
+        });
+
+        // Handle button click to process the PDF and download JSON
+        document.getElementById('test').addEventListener('click', function() {
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const pdfData = e.target.result;
+
+                    // Using PDF.js to extract text from the PDF
+                    pdfjsLib.getDocument({data: pdfData}).promise.then(function(pdf) {
+                        pdf.getPage(1).then(function(page) {
+                            page.getTextContent().then(function(textContent) {
+                                // Extract text from PDF page content
+                                const textItems = textContent.items;
+                                let text = '';
+
+                                // Join all text items to form the full text
+                                for (let i = 0; i < textItems.length; i++) {
+                                    text += textItems[i].str + ' ';
+                                }
+
+                                // Prepare JSON structure
+                                const pdfJson = {
+                                    title: file.name,
+                                    content: text.trim()
+                                };
+
+                                // Convert JSON object to string
+                                const jsonString = JSON.stringify(pdfJson, null, 4);
+
+                                // Create a blob from the JSON string
+                                const blob = new Blob([jsonString], { type: 'application/json' });
+
+                                // Create a download link
+                                const link = document.createElement('a');
+                                link.href = URL.createObjectURL(blob);
+                                link.download = file.name.replace('.pdf', '.json');  // Replace .pdf with .json
+
+                                // Trigger the download
+                                link.click();
+                            }).catch(function(err) {
+                                console.error('Error getting text content:', err);
+                                alert('Error extracting text from PDF.');
+                            });
+                        }).catch(function(err) {
+                            console.error('Error getting page:', err);
+                            alert('Error getting page from PDF.');
+                        });
+                    }).catch(function(err) {
+                        console.error('Error loading PDF:', err);
+                        alert('Error loading PDF.');
+                    });
+                };
+
+                reader.readAsArrayBuffer(file);
+            } else {
+                alert('Please select a PDF file first.');
+            }
+        });
+    </script>
+
+    <!-- Add PDF.js library and worker -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+    </script>
+</body>
+</html>
