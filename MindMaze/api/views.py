@@ -18,4 +18,5 @@ def index(request):
 
 def pdf_document_list(request):
     documents = PDFDocument.objects.all()
+    #first_document = PDFDocument.objects.get(pk=1)
     return render(request, 'api/pdf_document_list.html', {'documents': documents})

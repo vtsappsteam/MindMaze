@@ -1,19 +1,24 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Documents</title>
+    <link rel="stylesheet" href="{% static 'api/index.css' %}">
 </head>
 <body>
-    <h1>PDF Documents</h1>
-    <ul>
-        {% for document in documents %}
-            <li>
-                <h2>{{ document.title }}</h2>
-                <p>{{ document.content }}</p>
-            </li>
-        {% endfor %}
-    </ul>
+    <div class="container">
+        <h1 class="page-title">PDF Documents</h1>
+        <a href="/" class="cta-button">Početna strana</a>
+        <ul class="document-list">
+            {% for document in documents %}
+                <li class="document-item">
+                    <h2 class="document-title">{{ document.title }}</h2>
+                    <p class="document-content">{{ document.content }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 </body>
 </html>
